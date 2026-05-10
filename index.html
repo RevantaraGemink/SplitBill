@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SplitBill – Pembagian Tagihan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>SplitBill</h1>
+    <p>Pembagian tagihan adil dan mudah</p>
+  </header>
+
+  <main class="container">
+    <!-- Stepper -->
+    <div id="stepper" class="stepper">
+      <div class="step active" data-step="1">1. Orang</div>
+      <div class="step" data-step="2">2. Barang</div>
+      <div class="step" data-step="3">3. Pembagian</div>
+      <div class="step" data-step="4">4. Diskon</div>
+      <div class="step" data-step="5">5. Hasil</div>
+    </div>
+
+    <!-- Step 1: Jumlah Orang -->
+    <section id="step-1" class="step-section active">
+      <h2>Berapa orang yang ikut?</h2>
+      <input type="number" id="people-count" min="1" placeholder="Masukkan jumlah orang" />
+      <button id="to-step-2" class="next-btn">Lanjut</button>
+    </section>
+
+    <!-- Step 2: Input Barang -->
+    <section id="step-2" class="step-section">
+      <h2>Tambah Barang</h2>
+      <div class="item-form">
+        <input type="text" id="item-name" placeholder="Nama barang" />
+        <input type="text" id="item-price" inputmode="numeric" placeholder="Harga per unit (Rp)" />
+        <input type="number" id="item-qty" min="1" placeholder="Kuantitas" />
+        <button id="add-item" class="add-btn">Tambah Barang</button>
+      </div>
+      <ul id="items-list" class="items-list"></ul>
+      <button id="to-step-3" class="next-btn">Lanjut ke Pembagian</button>
+    </section>
+
+    <!-- Step 3: Pembagian Barang -->
+    <section id="step-3" class="step-section">
+      <h2>Siapa beli apa?</h2>
+      <div id="assignment-container" class="assignment-list"></div>
+      <button id="to-step-4" class="next-btn">Lanjut ke Diskon</button>
+    </section>
+
+    <!-- Step 4: Diskon -->
+    <section id="step-4" class="step-section">
+      <h2>Diskon Nilai Tetap</h2>
+      <input type="text" id="discount-value" inputmode="numeric" placeholder="Masukkan total akhir (Rp)" />
+      <button id="calculate" class="calc-btn">Hitung</button>
+    </section>
+
+    <!-- Step 5: Hasil -->
+    <section id="step-5" class="step-section">
+      <h2>Hasil Pembayaran</h2>
+      <div id="results" class="results-grid"></div>
+      <button id="reset" class="reset-btn">Reset</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
