@@ -29,8 +29,12 @@
     <!-- Step 1: Jumlah Orang -->
     <section id="step-1" class="step-section active">
       <h2>Berapa orang yang ikut?</h2>
-      <input type="number" id="people-count" min="1" placeholder="Masukkan jumlah orang" />
-      <button id="to-step-2" class="next-btn">Lanjut</button>
+      <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+        <input type="number" id="people-count" min="1" placeholder="Masukkan jumlah orang" style="flex: 1;" />
+        <button id="generate-names" class="add-btn" style="width: auto; white-space: nowrap; margin-top: 0.5rem;">Isi Nama</button>
+      </div>
+      <div id="names-container" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;"></div>
+      <button id="to-step-2" class="next-btn" style="display: none; margin-top: 1rem;">Lanjut ke Barang</button>
     </section>
 
     <!-- Step 2: Input Barang -->

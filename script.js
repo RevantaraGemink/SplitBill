@@ -3,6 +3,7 @@
 // State penyimpanan sementara
 const state = {
   peopleCount: 0,
+  peopleNames: [],
   items: [], // array of {name, price, qty, participants: []}
   discount: 0, // ini sekarang berarti TOTAL AKHIR yang dibayar
   totals: {} 
@@ -34,13 +35,36 @@ function showStep(stepNumber) {
 
 // ---------- STEP 1: Jumlah Orang ----------
 const peopleInput = document.getElementById('people-count');
-document.getElementById('to-step-2').addEventListener('click', () => {
+const generateNamesBtn = document.getElementById('generate-names');
+const namesContainer = document.getElementById('names-container');
+const toStep2Btn = document.getElementById('to-step-2');
+
+generateNamesBtn.addEventListener('click', () => {
   const count = parseInt(peopleInput.value, 10);
   if (isNaN(count) || count <= 0) {
     alert('Masukkan jumlah orang yang valid (>0)');
     return;
   }
+  namesContainer.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'person-name-input';
+    input.placeholder = `Nama Orang ke-${i + 1}`;
+    namesContainer.appendChild(input);
+  }
+  toStep2Btn.style.display = 'block';
+});
+
+toStep2Btn.addEventListener('click', () => {
+  const count = parseInt(peopleInput.value, 10);
   state.peopleCount = count;
+  state.peopleNames = [];
+  const nameInputs = document.querySelectorAll('.person-name-input');
+  nameInputs.forEach((input, index) => {
+    const val = input.value.trim();
+    state.peopleNames.push(val !== '' ? val : `Orang ${index + 1}`);
+  });
   showStep(2);
 });
 
@@ -108,7 +132,7 @@ function renderAssignmentUI() {
       });
       
       label.appendChild(cb);
-      label.appendChild(document.createTextNode(` Orang ${i + 1}`));
+      label.appendChild(document.createTextNode(` ${state.peopleNames[i]}`));
       participantsDiv.appendChild(label);
     }
     itemDiv.appendChild(participantsDiv);
@@ -174,7 +198,7 @@ function renderResults() {
     const card = document.createElement('div');
     card.className = 'result-card';
     const header = document.createElement('h3');
-    header.textContent = `Orang ${i + 1}`;
+    header.textContent = state.peopleNames[i];
     const amount = document.createElement('p');
     amount.textContent = formatRupiah(state.totals[i]);
     card.appendChild(header);
@@ -186,10 +210,13 @@ function renderResults() {
 // ---------- RESET ----------
 document.getElementById('reset').addEventListener('click', () => {
   state.peopleCount = 0;
+  state.peopleNames = [];
   state.items = [];
   state.discount = 0;
   state.totals = {};
   peopleInput.value = '';
+  namesContainer.innerHTML = '';
+  toStep2Btn.style.display = 'none';
   itemsList.innerHTML = '';
   discountInput.value = '';
   document.getElementById('assignment-container').innerHTML = '';

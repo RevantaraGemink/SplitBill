@@ -122,6 +122,9 @@ input[type="number"], input[type="text"] {
   color: var(--text-main);
   transition: all 0.2s ease;
 }
+.person-name-input {
+  margin: 0;
+}
 input:focus {
   border-color: var(--color-primary);
   outline: none;
