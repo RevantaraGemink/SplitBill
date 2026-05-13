@@ -4,71 +4,174 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SplitBill – Pembagian Tagihan</title>
+  <title>SplitEase – Smart Bill Splitter</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="header">
-    <h1>SplitBill</h1>
-    <p>Pembagian tagihan adil dan mudah</p>
+    <div class="logo">SplitEase</div>
   </header>
 
   <main class="container">
     <!-- Stepper -->
     <div id="stepper" class="stepper">
-      <div class="step active" data-step="1">1. Orang</div>
-      <div class="step" data-step="2">2. Barang</div>
-      <div class="step" data-step="3">3. Pembagian</div>
-      <div class="step" data-step="4">4. Diskon</div>
-      <div class="step" data-step="5">5. Hasil</div>
+      <div class="step-bar active" data-step="1"></div>
+      <div class="step-bar" data-step="2"></div>
+      <div class="step-bar" data-step="3"></div>
+      <div class="step-bar" data-step="4"></div>
+      <div class="step-bar" data-step="5"></div>
     </div>
 
-    <!-- Step 1: Jumlah Orang -->
+    <!-- Step 1: Setup (Siapa yang ikut?) -->
     <section id="step-1" class="step-section active">
-      <h2>Berapa orang yang ikut?</h2>
-      <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
-        <input type="number" id="people-count" min="1" placeholder="Masukkan jumlah orang" style="flex: 1;" />
-        <button id="generate-names" class="add-btn" style="width: auto; white-space: nowrap; margin-top: 0.5rem;">Isi Nama</button>
+      <h2>Siapa yang ikut?</h2>
+      <p class="subtitle">Tambahkan semua orang yang terlibat agar pembagian tetap adil dan seimbang.</p>
+      
+      <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div class="input-group">
+          <label>Total Peserta</label>
+          <div class="counter-container">
+            <button class="counter-btn" id="people-minus">—</button>
+            <div class="counter-value" id="people-count-display">4</div>
+            <button class="counter-btn" id="people-plus">+</button>
+          </div>
+        </div>
+
+        <div id="names-container" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Name inputs will be generated here -->
+        </div>
+
+        <button class="btn btn-add" id="add-manual-person">
+          <span>+</span> Tambah orang lain
+        </button>
       </div>
-      <div id="names-container" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;"></div>
-      <button id="to-step-2" class="next-btn" style="display: none; margin-top: 1rem;">Lanjut ke Barang</button>
+
+      <div class="btn-container-fixed">
+        <button id="to-step-2" class="btn btn-primary" style="max-width: 600px; margin: 0 auto;">
+          Lanjut ke Barang →
+        </button>
+      </div>
     </section>
 
-    <!-- Step 2: Input Barang -->
+    <!-- Step 2: Tambah Barang -->
     <section id="step-2" class="step-section">
       <h2>Tambah Barang</h2>
-      <div class="item-form">
-        <input type="text" id="item-name" placeholder="Nama barang" />
-        <input type="text" id="item-price" inputmode="numeric" placeholder="Harga per unit (Rp)" />
-        <input type="number" id="item-qty" min="1" placeholder="Kuantitas" />
-        <button id="add-item" class="add-btn">Tambah Barang</button>
+      <p class="subtitle">Apa saja yang dibeli? Tambahkan barang satu per satu.</p>
+      
+      <div class="items-grid">
+        <!-- Form Barang Baru -->
+        <div class="card">
+          <h3>Barang Baru</h3>
+          <div class="input-group">
+            <label>Nama Barang</label>
+            <input type="text" id="item-name" placeholder="misal: Pizza Margherita" />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="input-group">
+              <label>Harga Satuan</label>
+              <input type="text" id="item-price" inputmode="numeric" placeholder="Rp 0" />
+            </div>
+            <div class="input-group">
+              <label>Jumlah</label>
+              <input type="number" id="item-qty" value="1" min="1" />
+            </div>
+          </div>
+          <button id="add-item" class="btn btn-secondary">
+            <span>+</span> Tambah Barang
+          </button>
+        </div>
+
+        <!-- Ringkasan Barang -->
+        <div class="card bill-summary">
+          <div class="summary-header">
+            <h3>Daftar Barang</h3>
+            <span id="item-count-badge">0 barang</span>
+          </div>
+          <div id="items-list">
+            <!-- Items will appear here -->
+          </div>
+          <div class="subtotal-row">
+            <label>Subtotal</label>
+            <div class="value" id="running-subtotal">Rp 0</div>
+          </div>
+        </div>
       </div>
-      <ul id="items-list" class="items-list"></ul>
-      <button id="to-step-3" class="next-btn">Lanjut ke Pembagian</button>
+
+      <div class="btn-container-fixed" style="margin-top: 2rem;">
+        <button id="to-step-3" class="btn btn-primary">
+          Lanjut ke Pembagian →
+        </button>
+      </div>
     </section>
 
-    <!-- Step 3: Pembagian Barang -->
+    <!-- Step 3: Pembagian (Siapa makan apa?) -->
     <section id="step-3" class="step-section">
-      <h2>Siapa beli apa?</h2>
-      <div id="assignment-container" class="assignment-list"></div>
-      <button id="to-step-4" class="next-btn">Lanjut ke Diskon</button>
+      <h2>Siapa makan apa?</h2>
+      <p class="subtitle">Bagikan barang ke setiap orang untuk menghitung bagian mereka.</p>
+      
+      <div id="assignment-container" class="assignment-grid">
+        <!-- Assignment cards generated here -->
+      </div>
+
+      <div class="btn-container-fixed" style="display: flex; gap: 1rem; margin-top: 3rem; justify-content: center;">
+        <button id="back-to-2" class="btn btn-secondary" style="width: auto; padding: 1.1rem 2rem;">← Kembali</button>
+        <button id="to-step-4" class="btn btn-primary" style="max-width: 400px;">Lanjut ke Total →</button>
+      </div>
     </section>
 
-    <!-- Step 4: Diskon -->
+    <!-- Step 4: Total Akhir & Penyesuaian -->
     <section id="step-4" class="step-section">
-      <h2>Diskon Nilai Tetap</h2>
-      <input type="text" id="discount-value" inputmode="numeric" placeholder="Masukkan total akhir (Rp)" />
-      <button id="calculate" class="calc-btn">Hitung</button>
+      <h2>Total Akhir & Penyesuaian</h2>
+      <p class="subtitle">Masukkan total biaya akhir yang tercantum di struk.</p>
+      
+      <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <div style="text-align: left;">
+            <label style="color: var(--primary); font-weight: 600; font-size: 0.8rem;">Subtotal Terhitung</label>
+            <p style="color: var(--gray-500); font-size: 0.85rem;">Total dari semua barang yang dibagikan</p>
+          </div>
+          <div style="font-size: 1.5rem; font-weight: 800;" id="calc-subtotal-final">Rp 0</div>
+        </div>
+
+        <div class="input-group">
+          <label>Total Akhir Struk</label>
+          <div style="position: relative;">
+            <input type="text" id="final-receipt-total" inputmode="numeric" placeholder="Masukkan total bayar" style="padding-right: 3rem;" />
+            <span style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--gray-400); cursor: pointer;" id="clear-final">✕</span>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <i>ℹ️</i>
+          <div>
+            <p><strong>Penyesuaian Proporsional</strong></p>
+            <p>Setiap selisih (pajak, tip, atau diskon) akan dibagi berdasarkan persentase subtotal masing-masing orang. Tidak perlu hitung manual.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-container-fixed" style="display: flex; gap: 1rem; margin-top: 3rem; justify-content: center;">
+        <button id="back-to-3" class="btn btn-secondary" style="width: auto; padding: 1.1rem 2rem;">← Kembali</button>
+        <button id="calculate" class="btn btn-primary" style="max-width: 400px;">Hitung Hasil Akhir ✓</button>
+      </div>
     </section>
 
-    <!-- Step 5: Hasil -->
+    <!-- Step 5: Hasil Akhir -->
     <section id="step-5" class="step-section">
-      <h2>Hasil Pembayaran</h2>
-      <div id="results" class="results-grid"></div>
-      <button id="reset" class="reset-btn">Reset</button>
+      <h2>Semua Selesai!</h2>
+      <p class="subtitle">Berikut adalah rincian akhir siapa membayar berapa.</p>
+      
+      <div id="results" class="results-grid">
+        <!-- Result cards generated here -->
+      </div>
+
+      <div class="footer-btns">
+        <button class="btn btn-primary" id="share-btn">Bagikan Rincian</button>
+        <button class="btn btn-secondary" id="reset">Reset & Mulai Lagi</button>
+      </div>
     </section>
   </main>
 
