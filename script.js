@@ -1,4 +1,4 @@
-// script.js - SplitEase Logic
+// script.js - SplitBill Logic (dibuat oleh Kgaaa)
 
 const state = {
   peopleCount: 4,
@@ -144,7 +144,7 @@ document.getElementById('add-item').addEventListener('click', () => {
     return;
   }
   
-  state.items.push({ name, price, qty, participants: [] });
+  state.items.push({ name, price, qty, splitMode: 'manual', assignments: {} });
   itemNameInput.value = '';
   itemPriceInput.value = '';
   itemQtyInput.value = '1';
@@ -161,82 +161,201 @@ document.getElementById('to-step-3').addEventListener('click', () => {
 });
 
 // --- STEP 3: Assign ---
+function formatPortion(val) {
+  if (val === 0) return '';
+  if (Number.isInteger(val)) return `${val} porsi`;
+  return `${val.toFixed(2).replace(/\.?0+$/, '')} porsi`;
+}
+
 function renderAssignmentUI() {
   const container = document.getElementById('assignment-container');
   container.innerHTML = '';
   
   state.items.forEach((item, itemIdx) => {
-    // Initialize assignments if not exists
+    // Initialize assignments and splitMode if not exists
     if (!item.assignments) {
       item.assignments = {};
+    }
+    if (!item.splitMode) {
+      item.splitMode = 'manual';
     }
     
     const card = document.createElement('div');
     card.className = 'assignment-card';
     
-    const totalAssigned = Object.values(item.assignments).reduce((sum, val) => sum + val, 0);
-    const remaining = item.qty - totalAssigned;
-    
     let statusHTML = '';
-    if (remaining === 0) {
-      statusHTML = '<span class="status-badge assigned">✓ Terbagi</span>';
-    } else if (remaining > 0) {
-      statusHTML = `<span class="status-badge remaining">Sisa ${remaining}</span>`;
+    const isManual = item.splitMode === 'manual';
+    
+    if (isManual) {
+      const totalAssigned = Object.values(item.assignments).reduce((sum, val) => sum + val, 0);
+      const remaining = item.qty - totalAssigned;
+      
+      if (remaining === 0) {
+        statusHTML = '<span class="status-badge assigned">✓ Terbagi</span>';
+      } else if (remaining > 0) {
+        statusHTML = `<span class="status-badge remaining">Sisa ${remaining}</span>`;
+      } else {
+        statusHTML = `<span class="status-badge incomplete">Kelebihan! (${Math.abs(remaining)})</span>`;
+      }
     } else {
-      statusHTML = `<span class="status-badge incomplete">Kelebihan! (${Math.abs(remaining)})</span>`;
+      const selectedCount = Object.values(item.assignments).filter(val => val > 0).length;
+      if (selectedCount > 0) {
+        statusHTML = `<span class="status-badge assigned">✓ Terbagi Rata (${selectedCount} orang)</span>`;
+      } else {
+        statusHTML = `<span class="status-badge incomplete">Belum Dibagi</span>`;
+      }
     }
 
     card.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
         <div>
           <h4>${item.name}</h4>
           <div class="category">${item.qty}x @ ${formatRupiah(item.price)}</div>
         </div>
         <div style="text-align: right;">
-          <div style="font-weight: 800; color: var(--primary);">${formatRupiah(item.price * item.qty)}</div>
-          <div style="margin-top: 4px;">${statusHTML}</div>
+          <div style="font-weight: 800; color: var(--primary); font-size: 1.15rem;">${formatRupiah(item.price * item.qty)}</div>
+          <div style="margin-top: 6px;">${statusHTML}</div>
         </div>
       </div>
+      
+      <!-- Split Mode Tabs -->
+      <div class="split-mode-selector">
+        <button class="mode-btn ${isManual ? 'active' : ''}" data-mode="manual">Porsi Manual</button>
+        <button class="mode-btn ${!isManual ? 'active' : ''}" data-mode="equal">Bagi Rata</button>
+      </div>
+
       <div class="participants-list" style="margin-top: 1rem;"></div>
     `;
     
-    const list = card.querySelector('.participants-list');
-    state.peopleNames.forEach((name, pIdx) => {
-      const row = document.createElement('div');
-      row.className = 'participant-row';
-      
-      const count = item.assignments[pIdx] || 0;
-      const personalPrice = count * item.price;
-      
-      row.innerHTML = `
-        <div class="participant-info">
-          <div class="avatar">${name.charAt(0).toUpperCase()}</div>
-          <span style="font-weight: 500;">${name}</span>
-        </div>
-        <div class="qty-selector">
-          <button class="qty-btn minus" ${count === 0 ? 'disabled' : ''}>—</button>
-          <span class="qty-val">${count}</span>
-          <button class="qty-btn plus" ${remaining <= 0 ? 'disabled' : ''}>+</button>
-          <div class="price" style="margin-left: 1rem;">${count > 0 ? formatRupiah(personalPrice) : ''}</div>
-        </div>
-      `;
-      
-      row.querySelector('.minus').addEventListener('click', () => {
-        if (item.assignments[pIdx] > 0) {
-          item.assignments[pIdx]--;
-          renderAssignmentUI();
+    // Add mode toggle listeners
+    const modeButtons = card.querySelectorAll('.mode-btn');
+    modeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.dataset.mode;
+        if (item.splitMode === mode) return;
+        
+        if (mode === 'manual') {
+          item.splitMode = 'manual';
+          item.assignments = {};
+        } else {
+          // Switching to equal split mode:
+          // Try to migrate current people who have assignments, or select everyone by default
+          const activePIdxs = Object.keys(item.assignments).map(Number).filter(idx => item.assignments[idx] > 0);
+          item.splitMode = 'equal';
+          item.assignments = {};
+          
+          if (activePIdxs.length > 0) {
+            const portion = item.qty / activePIdxs.length;
+            activePIdxs.forEach(idx => {
+              item.assignments[idx] = portion;
+            });
+          } else {
+            // Default: check all people
+            const N = state.peopleNames.length;
+            const portion = item.qty / N;
+            state.peopleNames.forEach((_, idx) => {
+              item.assignments[idx] = portion;
+            });
+          }
         }
+        renderAssignmentUI();
       });
-      
-      row.querySelector('.plus').addEventListener('click', () => {
-        if (remaining > 0) {
-          item.assignments[pIdx] = (item.assignments[pIdx] || 0) + 1;
-          renderAssignmentUI();
-        }
-      });
-      
-      list.appendChild(row);
     });
+    
+    const list = card.querySelector('.participants-list');
+    
+    if (isManual) {
+      const totalAssigned = Object.values(item.assignments).reduce((sum, val) => sum + val, 0);
+      const remaining = item.qty - totalAssigned;
+      
+      state.peopleNames.forEach((name, pIdx) => {
+        const row = document.createElement('div');
+        row.className = 'participant-row';
+        
+        const count = item.assignments[pIdx] || 0;
+        const personalPrice = count * item.price;
+        
+        row.innerHTML = `
+          <div class="participant-info">
+            <div class="avatar">${name.charAt(0).toUpperCase()}</div>
+            <span style="font-weight: 500;">${name}</span>
+          </div>
+          <div class="qty-selector">
+            <button class="qty-btn minus" ${count === 0 ? 'disabled' : ''}>—</button>
+            <span class="qty-val">${count}</span>
+            <button class="qty-btn plus" ${remaining <= 0 ? 'disabled' : ''}>+</button>
+            <div class="price" style="margin-left: 1rem;">${count > 0 ? formatRupiah(personalPrice) : ''}</div>
+          </div>
+        `;
+        
+        row.querySelector('.minus').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (item.assignments[pIdx] > 0) {
+            item.assignments[pIdx]--;
+            renderAssignmentUI();
+          }
+        });
+        
+        row.querySelector('.plus').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (remaining > 0) {
+            item.assignments[pIdx] = (item.assignments[pIdx] || 0) + 1;
+            renderAssignmentUI();
+          }
+        });
+        
+        list.appendChild(row);
+      });
+    } else {
+      state.peopleNames.forEach((name, pIdx) => {
+        const row = document.createElement('div');
+        const count = item.assignments[pIdx] || 0;
+        const isSelected = count > 0;
+        const personalPrice = count * item.price;
+        
+        row.className = `participant-row clickable ${isSelected ? 'selected' : ''}`;
+        
+        row.innerHTML = `
+          <div class="participant-info">
+            <div class="check-indicator">${isSelected ? '✓' : ''}</div>
+            <div class="avatar">${name.charAt(0).toUpperCase()}</div>
+            <span style="font-weight: 500;">${name}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <span style="font-size: 0.85rem; color: var(--gray-500); font-weight: 500;">${formatPortion(count)}</span>
+            <div class="price" style="margin-left: 0.5rem; font-weight: 600; color: var(--primary);">${count > 0 ? formatRupiah(personalPrice) : ''}</div>
+          </div>
+        `;
+        
+        row.addEventListener('click', () => {
+          const currentlySelected = (item.assignments[pIdx] || 0) > 0;
+          
+          // Collect all indices that will be active
+          const selectedPIdxs = [];
+          state.peopleNames.forEach((_, idx) => {
+            if (idx === pIdx) {
+              if (!currentlySelected) {
+                selectedPIdxs.push(idx);
+              }
+            } else if ((item.assignments[idx] || 0) > 0) {
+              selectedPIdxs.push(idx);
+            }
+          });
+          
+          // Re-calculate portions equally
+          item.assignments = {};
+          if (selectedPIdxs.length > 0) {
+            const portion = item.qty / selectedPIdxs.length;
+            selectedPIdxs.forEach(idx => {
+              item.assignments[idx] = portion;
+            });
+          }
+          renderAssignmentUI();
+        });
+        
+        list.appendChild(row);
+      });
+    }
     
     container.appendChild(card);
   });
@@ -353,14 +472,14 @@ document.getElementById('reset').addEventListener('click', () => {
 });
 
 document.getElementById('share-btn').addEventListener('click', () => {
-  let text = "*Ringkasan Pembayaran SplitEase*\n\n";
+  let text = "*Ringkasan Pembayaran SplitBill*\n_dibuat oleh Kgaaa_\n\n";
   state.peopleNames.forEach((name, i) => {
     text += `${name}: ${formatRupiah(state.totals[i].adjusted)}\n`;
   });
   text += `\nTotal Akhir: ${formatRupiah(state.finalTotal)}`;
   
   if (navigator.share) {
-    navigator.share({ title: 'SplitEase', text });
+    navigator.share({ title: 'SplitBill oleh Kgaaa', text });
   } else {
     alert('Ringkasan disalin ke papan klip!');
     navigator.clipboard.writeText(text);

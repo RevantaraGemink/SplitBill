@@ -49,6 +49,22 @@ body {
   letter-spacing: -0.5px;
 }
 
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-badge {
+  background: rgba(0, 82, 204, 0.08); /* accent light blue */
+  color: var(--primary);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+}
+
 .header-icons {
   display: flex;
   gap: 1rem;
@@ -580,3 +596,79 @@ input:focus {
     z-index: 90;
   }
 }
+
+/* --- Split Mode Selector & Equal Split UI --- */
+.split-mode-selector {
+  display: flex;
+  background: var(--gray-100);
+  padding: 4px;
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+  gap: 4px;
+}
+
+.mode-btn {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-btn:hover {
+  color: var(--dark);
+}
+
+.mode-btn.active {
+  background: var(--white);
+  color: var(--dark);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Clickable Participant Row for Equal Split */
+.participant-row.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.75rem;
+  margin: 0 -0.75rem;
+  border-radius: 10px;
+}
+
+.participant-row.clickable:hover {
+  background-color: var(--gray-50);
+}
+
+.participant-row.clickable.selected {
+  background-color: rgba(0, 82, 204, 0.08); /* light blue accent */
+}
+
+/* Checkmark indicator for selected participants */
+.check-indicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--gray-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: transparent;
+  transition: all 0.2s ease;
+  margin-right: 0.5rem;
+}
+
+.participant-row.selected .check-indicator {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--white);
+}
+
+.participant-row.clickable:not(.selected):hover .check-indicator {
+  border-color: var(--primary);
+}
+
